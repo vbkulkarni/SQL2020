@@ -37,3 +37,13 @@ SELECT (
 		)AS data FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
 	) As response 
 END
+
+
+-----User Update
+Select outletcode,outletname,address,blank='',month='10',status='1',created='2',deleted='0',year='2020' from apOutlet
+Where clientID=25 ANd deleted=0 And clientoutletcode In (
+
+Select * from MobiUser
+Where clientID=25 And deleted=0 And position='Beauty Advisor'
+Order by positioncode
+
