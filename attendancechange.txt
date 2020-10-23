@@ -38,3 +38,17 @@ SELECT (
 	) AS result, 'success' as status
 	FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
 ) AS Response
+
+
+------user Addition-----
+
+Select * from apEmployee
+Where clientID=25 And deleted=0 
+
+Select * from apposition
+Where clientID=25 And deleted=0 
+Order by positioncode
+
+Select Max(userid) From mobiuser
+Select Max(employeeiD) From apEmployee
+Select Max(positionID) From apPosition
