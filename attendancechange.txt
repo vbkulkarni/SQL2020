@@ -1,0 +1,40 @@
+USE [SimplyAmplify]
+GO
+/****** Object:  StoredProcedure [dbo].[MobigetMarkAttendance_sp]    Script Date: 17-06-2019 12:31:31 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER Proc [dbo].[MobigetMarkAttendance_sp]
+@json NVARCHAR(MAX)
+As 
+
+Declare @userid As Varchar(20)
+Declare @clientId As Varchar(20)
+
+--Declare @json As Varchar(Max)
+
+--set @json='{"userid":"1007","clientID":"15"}'
+
+Select @userid=[userid]
+From OPENJSON(@json,'$')
+With([userid] Varchar(20) '$.userid',[clientID] Varchar(20) '$.clientID');
+
+Select @clientId=clientID from [dbo].[MobiUser](Nolock) 
+Where UserID=@userid
+
+SELECT (
+	SELECT (
+		Select ID, clientID, keys, value, condition, optionorder
+		From [dbo].[MobiMarkAttendance] (nolock)
+		Where clientID=17
+		Union
+		Select 0, clientID, 'attendance_present' as keys, 
+		Case When cnt>0 Then 'Yes' Else 'No' End as value, '', 0
+		From (Select count(*) as cnt, clientID from [dbo].[MobiSyncAttendance]
+		Where clientID=15 and ResponseDate=getdate() Group By clientID) a
+		FOR JSON PATH
+	) AS result, 'success' as status
+	FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+) AS Response

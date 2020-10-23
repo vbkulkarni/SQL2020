@@ -1,0 +1,39 @@
+Select @userid=[userid],@storecode=[storecode],@clientId=[clientID]
+From OPENJSON(@json,'$')
+With([userid] Varchar(20) '$.userid',[clientID] Varchar(20) '$.clientID',[storecode] Varchar(20) '$.storecode');
+
+BEGIN
+SELECT (
+	SELECT * FROM (
+			SELECT 
+				(
+				SELECT * FROM (
+				SELECT schemeGroup As title, schemeDescription As 'text', [image]= '',
+								(
+								SELECT * FROM (
+										SELECT freeQty As title,discountVal As text
+										FROM MobiScheme Nolock
+										WHERE clientID=16 And schemeGroup='Product'
+										)As c FOR JSON PATH
+								)as [value]
+				FROM MobiScheme Nolock 
+				WHERE clientID=16 And schemeGroup='Product'
+						)As b FOR JSON PATH
+				) As list1,
+			(
+				SELECT * FROM (
+				SELECT schemeGroup As title, schemeDescription As 'text', image='',
+							(
+								SELECT * FROM (
+								SELECT freeQty As title,discountVal As text
+								FROM MobiScheme Nolock
+								WHERE clientID=16 And schemeGroup='Invoice'
+										)As c FOR JSON PATH
+							)as [value]
+				FROM MobiScheme Nolock 
+				WHERE clientID=16 And schemeGroup='Invoice'
+						)b FOR JSON PATH 
+			) AS list2
+		)AS data FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+	) As response 
+END
